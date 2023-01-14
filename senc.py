@@ -6,7 +6,6 @@ from Crypto.Util import Padding
 
 
 def caesar_encrypt(shellcode, key):
-    """Caesar Cipher encryption method"""
     key = int(key)
     encrypted_shellcode = bytearray()
     for b in shellcode:
@@ -19,7 +18,6 @@ def caesar_encrypt(shellcode, key):
 
 
 def aes_encrypt(shellcode, key):
-    """AES encryption method"""
     key = key.encode()
     # Pad the key to the correct length
     key = key.ljust(16, b'\x00')
@@ -34,7 +32,6 @@ def aes_encrypt(shellcode, key):
 
 
 def xor_encrypt(shellcode, key):
-    """XOR encryption method"""
     key = key.encode()
     encrypted_shellcode = bytearray()
     for i, c in enumerate(shellcode):
