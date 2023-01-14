@@ -13,4 +13,5 @@ That is mainly for:
 msfvenom builtin decoder on encoded shellcode is usually a red flag for any security solution.
 
 1 - using with a shellcode runner with decryption routine implemented.
+
 2 - DEP with ROP decode and etc..
