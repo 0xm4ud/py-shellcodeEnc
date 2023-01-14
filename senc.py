@@ -76,7 +76,7 @@ def main():
 
     if args.encryption != None and args.format == 'python':
         shellcode += "\""
-        shellcode = shellcode.replace("\" +\n\"", "").replace("shellcode =  b\"", "").replace("\"\n\"","").replace("\"\nshellcode += b\"", "")
+        shellcode = shellcode.replace("\" +\n\"", "").replace("shellcode =  b\"", "").replace("\"\n\"","").replace("\"\nshellcode += b\"", "").replace("\\x","")
 
     if args.encryption == 'rot' and args.key and args.format == 'python':
         shellcode = bytearray.fromhex(shellcode)
